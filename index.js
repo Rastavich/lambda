@@ -69,7 +69,7 @@ exports.handler = async (event) => {
       Amount: {
         id: "a@LY",
         type: "number",
-        number: parseInt(attributes.amount.value),
+        number: parseFloat(attributes.amount.value).toFixed(2),
       },
       Name: {
         id: "title",
