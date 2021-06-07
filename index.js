@@ -6,7 +6,7 @@ let NOTION_API_KEY = process.env.NOTION_API_KEY;
 
 exports.handler = async (event) => {
   let input = JSON.parse(event.body);
-  console.log(input);
+  console.log("Input: ", input);
   let transactionURL = input.data.relationships.transaction.links.related;
   let notionURL = "https://api.notion.com/v1/pages";
 
@@ -29,6 +29,21 @@ exports.handler = async (event) => {
   const {
     data: { attributes },
   } = upTransaction;
+
+  if (
+    attributes.status == "TRANSACTION_SETTLED" ||
+    attributes.description == "Quick save transfer from Spending" ||
+    attributes.description == "Round Up"
+  ) {
+    return {
+      statusCode: 200,
+      body: {
+        message: "Dont run on settled transactions, round ups or transfers",
+      },
+    };
+  }
+
+  console.log("Attributes: ", attributes);
 
   const data = JSON.stringify({
     parent: {
@@ -104,7 +119,7 @@ exports.handler = async (event) => {
 
   let response = {
     statusCode: 200,
-    body: notionCreate,
+    body: attributes,
   };
 
   return response;
