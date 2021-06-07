@@ -1,0 +1,24 @@
+{
+  "name": "up-notion",
+  "version": "1.0.0",
+  "description": "Lambda for up+notion",
+  "main": "index.js",
+  "dependencies": {
+    "node-fetch": "^2.6.1"
+  },
+  "devDependencies": {},
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "zip": "zip lambda.zip package.json *.js node_modules"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/Rastavich/lambda.git"
+  },
+  "author": "Isaac Hauser",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/Rastavich/lambda/issues"
+  },
+  "homepage": "https://github.com/Rastavich/lambda#readme"
+}
