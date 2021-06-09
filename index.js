@@ -4,6 +4,8 @@ let UP_KEY = process.env.UP_API_KEY;
 let NOTION_DB_ID = process.env.NOTION_DB_ID;
 let NOTION_API_KEY = process.env.NOTION_API_KEY;
 
+//Testing
+
 exports.handler = async (event) => {
   let input = JSON.parse(event.body);
   console.log("Input: ", input);
@@ -31,14 +33,14 @@ exports.handler = async (event) => {
   } = upTransaction;
 
   if (
-    attributes.status == "TRANSACTION_SETTLED" ||
-    attributes.description == "Quick save transfer from Spending" ||
-    attributes.description == "Round Up"
+    attributes.status === "HELD" ||
+    attributes.description === "Quick save transfer from Spending" ||
+    attributes.description === "Round Up"
   ) {
     return {
       statusCode: 200,
       body: {
-        message: "Dont run on settled transactions, round ups or transfers",
+        message: "Only run on settled transactions and transfers",
       },
     };
   }
@@ -69,7 +71,7 @@ exports.handler = async (event) => {
       Amount: {
         id: "a@LY",
         type: "number",
-        number: parseFloat(attributes.amount.value).toFixed(2),
+        number: parseFloat(attributes.amount.value),
       },
       Name: {
         id: "title",
@@ -97,6 +99,8 @@ exports.handler = async (event) => {
     },
   });
 
+  console.log(data);
+
   const notionRequestHeaders = {
     method: "POST",
     headers: {
@@ -113,7 +117,7 @@ exports.handler = async (event) => {
       try {
         return JSON.parse(json);
       } catch (err) {
-        return json;
+        return { statusCode: 400, body: json };
       }
     });
 
