@@ -10,7 +10,13 @@ let coverRegex = new RegExp(/["Cover"]*/);
 
 exports.handler = async (event) => {
   let input = JSON.parse(event.body);
-  console.log('Input: ', input);
+
+  let inputLog = {
+    msg: 'Input from UP',
+    input: input,
+  };
+  process.stdout.write(inputLog);
+
   let transactionURL = input.data.relationships.transaction.links.related;
   let notionURL = 'https://api.notion.com/v1/pages';
 
@@ -34,6 +40,12 @@ exports.handler = async (event) => {
     data: { attributes },
   } = upTransaction;
 
+  let transTypeLog = {
+    msg: 'Trasnactions attributes',
+    attributes: attributes,
+  };
+  process.stdout.write(transTypeLog);
+
   if (
     attributes.status === 'HELD' ||
     attributes.description === 'Quick save transfer from Spending' ||
@@ -41,6 +53,11 @@ exports.handler = async (event) => {
     attributes.description === 'Round Up' ||
     attributes.description.match(coverRegex)
   ) {
+    let unfollowedLog = {
+      msg: 'Trasnaction not added',
+      attributes: attributes.description,
+    };
+    process.stdout.write(unfollowedLog);
     return {
       statusCode: 200,
       body: {
@@ -48,8 +65,6 @@ exports.handler = async (event) => {
       },
     };
   }
-
-  console.log('Attributes: ', attributes);
 
   const data = JSON.stringify({
     parent: {
