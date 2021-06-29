@@ -1,4 +1,5 @@
 const fetch = require('node-fetch');
+const winston = require('winston');
 
 let UP_KEY = process.env.UP_API_KEY;
 let NOTION_DB_ID = process.env.NOTION_DB_ID;
@@ -6,16 +7,17 @@ let NOTION_API_KEY = process.env.NOTION_API_KEY;
 
 let coverRegex = new RegExp(/["Cover"]*/);
 
-//Testing
+const logger = winston.createLogger({
+  level: process.env.LOG_LEVEL || 'info',
+  format: winston.format.json(),
+  transports: [new winston.transports.Console()],
+});
 
-exports.handler = async (event) => {
+exports.handler = async (event, context) => {
+  logger.defaultMeta = { requestId: context.awsRequestId };
   let input = JSON.parse(event.body);
 
-  let inputLog = {
-    msg: 'Input from UP',
-    input: input,
-  };
-  process.stdout.write(inputLog);
+  logger.info('Transaction Created', input);
 
   let transactionURL = input.data.relationships.transaction.links.related;
   let notionURL = 'https://api.notion.com/v1/pages';
@@ -40,12 +42,6 @@ exports.handler = async (event) => {
     data: { attributes },
   } = upTransaction;
 
-  let transTypeLog = {
-    msg: 'Trasnactions attributes',
-    attributes: attributes,
-  };
-  process.stdout.write(transTypeLog);
-
   if (
     attributes.status === 'HELD' ||
     attributes.description === 'Quick save transfer from Spending' ||
@@ -53,11 +49,6 @@ exports.handler = async (event) => {
     attributes.description === 'Round Up' ||
     attributes.description.match(coverRegex)
   ) {
-    let unfollowedLog = {
-      msg: 'Trasnaction not added',
-      attributes: attributes.description,
-    };
-    process.stdout.write(unfollowedLog);
     return {
       statusCode: 200,
       body: {
@@ -117,8 +108,6 @@ exports.handler = async (event) => {
       },
     },
   });
-
-  console.log(data);
 
   const notionRequestHeaders = {
     method: 'POST',

@@ -4,7 +4,8 @@
   "description": "Lambda for up+notion",
   "main": "index.js",
   "dependencies": {
-    "node-fetch": "^2.6.1"
+    "node-fetch": "^2.6.1",
+    "winston": "^3.3.3"
   },
   "devDependencies": {},
   "scripts": {
