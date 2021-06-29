@@ -1,20 +1,22 @@
-const fetch = require("node-fetch");
+const fetch = require('node-fetch');
 
 let UP_KEY = process.env.UP_API_KEY;
 let NOTION_DB_ID = process.env.NOTION_DB_ID;
 let NOTION_API_KEY = process.env.NOTION_API_KEY;
 
+let coverRegex = new RegExp(/["Cover"]*/);
+
 //Testing
 
 exports.handler = async (event) => {
   let input = JSON.parse(event.body);
-  console.log("Input: ", input);
+  console.log('Input: ', input);
   let transactionURL = input.data.relationships.transaction.links.related;
-  let notionURL = "https://api.notion.com/v1/pages";
+  let notionURL = 'https://api.notion.com/v1/pages';
 
   const upRequestHeaders = {
     headers: {
-      Authorization: "Bearer " + UP_KEY,
+      Authorization: 'Bearer ' + UP_KEY,
     },
   };
 
@@ -33,19 +35,21 @@ exports.handler = async (event) => {
   } = upTransaction;
 
   if (
-    attributes.status === "HELD" ||
-    attributes.description === "Quick save transfer from Spending" ||
-    attributes.description === "Round Up"
+    attributes.status === 'HELD' ||
+    attributes.description === 'Quick save transfer from Spending' ||
+    attributes.description === 'Quick save transfer to Savings' ||
+    attributes.description === 'Round Up' ||
+    attributes.description.match(coverRegex)
   ) {
     return {
       statusCode: 200,
       body: {
-        message: "Only run on settled transactions and transfers",
+        message: 'Exclude Transfers, Held transactions, Round Up"s and Covers',
       },
     };
   }
 
-  console.log("Attributes: ", attributes);
+  console.log('Attributes: ', attributes);
 
   const data = JSON.stringify({
     parent: {
@@ -53,32 +57,32 @@ exports.handler = async (event) => {
     },
     properties: {
       Date: {
-        id: "MGZE",
-        type: "date",
+        id: 'MGZE',
+        type: 'date',
         date: {
           start: attributes.createdAt.toString(),
         },
       },
       Type: {
-        id: "[c{o",
-        type: "select",
+        id: '[c{o',
+        type: 'select',
         select: {
-          id: "e1661fc5-e5f8-444b-8667-a34c48e419f0",
-          name: "Expense",
-          color: "yellow",
+          id: 'e1661fc5-e5f8-444b-8667-a34c48e419f0',
+          name: 'Expense',
+          color: 'yellow',
         },
       },
       Amount: {
-        id: "a@LY",
-        type: "number",
+        id: 'a@LY',
+        type: 'number',
         number: parseFloat(attributes.amount.value),
       },
       Name: {
-        id: "title",
-        type: "title",
+        id: 'title',
+        type: 'title',
         title: [
           {
-            type: "text",
+            type: 'text',
             text: {
               content: attributes.description,
               link: null,
@@ -89,7 +93,7 @@ exports.handler = async (event) => {
               strikethrough: false,
               underline: false,
               code: false,
-              color: "default",
+              color: 'default',
             },
             plain_text: attributes.description,
             href: null,
@@ -102,11 +106,11 @@ exports.handler = async (event) => {
   console.log(data);
 
   const notionRequestHeaders = {
-    method: "POST",
+    method: 'POST',
     headers: {
-      Authorization: "Bearer " + NOTION_API_KEY,
-      "Content-Type": "application/json",
-      "Notion-Version": "2021-05-13",
+      Authorization: 'Bearer ' + NOTION_API_KEY,
+      'Content-Type': 'application/json',
+      'Notion-Version': '2021-05-13',
     },
     body: data,
   };
