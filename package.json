@@ -4,6 +4,7 @@
   "description": "Lambda for up+notion",
   "main": "index.js",
   "dependencies": {
+    "@notionhq/client": "^0.2.0",
     "node-fetch": "^2.6.1",
     "winston": "^3.3.3"
   },

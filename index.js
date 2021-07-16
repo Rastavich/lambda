@@ -5,7 +5,7 @@ let UP_KEY = process.env.UP_API_KEY;
 let NOTION_DB_ID = process.env.NOTION_DB_ID;
 let NOTION_API_KEY = process.env.NOTION_API_KEY;
 
-let coverRegex = new RegExp(/["Cover"]*/);
+let coverRegex = new RegExp(/\b(\w*Cover\w*)\b/);
 
 const logger = winston.createLogger({
   level: process.env.LOG_LEVEL || 'info',
@@ -42,6 +42,8 @@ exports.handler = async (event, context) => {
     data: { attributes },
   } = upTransaction;
 
+  logger.info('Transaction Type', attributes);
+
   if (
     attributes.status === 'HELD' ||
     attributes.description === 'Quick save transfer from Spending' ||
@@ -49,6 +51,7 @@ exports.handler = async (event, context) => {
     attributes.description === 'Round Up' ||
     attributes.description.match(coverRegex)
   ) {
+    logger.info('Transaction NOT added to notion', attributes);
     return {
       statusCode: 200,
       body: {
@@ -109,6 +112,8 @@ exports.handler = async (event, context) => {
     },
   });
 
+  logger.info('Data to push to notion', data);
+
   const notionRequestHeaders = {
     method: 'POST',
     headers: {
@@ -128,6 +133,8 @@ exports.handler = async (event, context) => {
         return { statusCode: 400, body: json };
       }
     });
+
+  logger.info('Added to Notion', notionCreate);
 
   let response = {
     statusCode: 200,
