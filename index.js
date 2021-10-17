@@ -24,12 +24,11 @@ const upRequestHeaders = {
 // Initialize notion client instance
 const notion = new Client({ auth: NOTION_API_KEY });
 
-exports.lambdaHandler = async (event, context) => {
+exports.handler = async (event, context) => {
   logger.defaultMeta = { requestId: context.awsRequestId };
   let input = JSON.parse(event.body);
-  let accountType = input.data.relationships.account.data.id;
   // TODO add automatic amountType check and pass to the transaction
-  let amountType = 'expense';
+  // let amountType = 'expense';
   logger.info('Transaction Created', input);
 
   let transactionURL = input.data.relationships.transaction.links.related;
@@ -46,10 +45,11 @@ exports.lambdaHandler = async (event, context) => {
 
   // Transaction data
   const {
-    data: { attributes },
+    data: { attributes, id },
   } = upTransaction;
 
-  logger.info('Transaction Type', attributes);
+  let accountType = id;
+  logger.info('Transaction Type', data);
 
   // Filter out any transactions we dont want
   if (
@@ -68,65 +68,68 @@ exports.lambdaHandler = async (event, context) => {
     };
   }
 
+  logger.info('AccountType', { accountType });
   // Check if transaction is from 2UP account or not.
   let databaseId =
     accountType === TWO_UP_ACCOUNT_ID ? NOTION_DB_ID_TWO_UP : NOTION_DB_ID;
+
+  logger.info('AccountOrigin', { databaseId });
   // Create the data object of the page for notion.
-  const data = JSON.stringify({
-    Date: {
-      id: 'MGZE',
-      type: 'date',
-      date: {
-        start: attributes.createdAt.toString(),
-      },
+  const notionData = {
+    parent: {
+      database_id: databaseId,
     },
-    Type: {
-      id: '[c{o',
-      type: 'select',
-      select: {
-        id: 'e1661fc5-e5f8-444b-8667-a34c48e419f0',
-        name: 'Expense',
-        color: 'yellow',
-      },
-    },
-    Amount: {
-      id: 'a@LY',
-      type: 'number',
-      number: parseFloat(attributes.amount.value),
-    },
-    Name: {
-      id: 'title',
-      type: 'title',
-      title: [
-        {
-          type: 'text',
-          text: {
-            content: attributes.description,
-            link: null,
-          },
-          annotations: {
-            bold: false,
-            italic: false,
-            strikethrough: false,
-            underline: false,
-            code: false,
-            color: 'default',
-          },
-          plain_text: attributes.description,
-          href: null,
+    properties: {
+      Date: {
+        id: 'MGZE',
+        type: 'date',
+        date: {
+          start: attributes.createdAt.toString(),
         },
-      ],
+      },
+      Type: {
+        id: '[c{o',
+        type: 'select',
+        select: {
+          id: 'e1661fc5-e5f8-444b-8667-a34c48e419f0',
+          name: 'Expense',
+          color: 'yellow',
+        },
+      },
+      Amount: {
+        id: 'a@LY',
+        type: 'number',
+        number: parseFloat(attributes.amount.value),
+      },
+      Name: {
+        id: 'title',
+        type: 'title',
+        title: [
+          {
+            type: 'text',
+            text: {
+              content: attributes.description,
+              link: null,
+            },
+            annotations: {
+              bold: false,
+              italic: false,
+              strikethrough: false,
+              underline: false,
+              code: false,
+              color: 'default',
+            },
+            plain_text: attributes.description,
+            href: null,
+          },
+        ],
+      },
     },
-  });
+  };
 
-  logger.info('Data to push to notion', data);
+  logger.info('Data to push to notion', notionData);
 
-  await createPage(databaseId).then((resp) => {
-    return {
-      statusCode: 200,
-      body: resp,
-    };
-  });
+  await createPage(notionData);
   /**
    * Creates new page in Notion.
    *
@@ -134,12 +137,12 @@ exports.lambdaHandler = async (event, context) => {
    *
    * @param {Array<{ number: number, title: string, state: "open" | "closed", comment_count: number, url: string }>} pagesToCreate
    */
-  async function createPage(databaseId) {
-    await Promise.all(
-      notion.pages.create({
-        parent: { database_id: databaseId },
-        properties: data,
-      })
-    );
+  async function createPage(data) {
+    const response = await notion.pages.create(data);
   }
+
+  return {
+    statusCode: 200,
+    body: 'Notion Page Created successfully',
+  };
 };

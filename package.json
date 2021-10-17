@@ -5,14 +5,14 @@
   "main": "index.js",
   "dependencies": {
     "@notionhq/client": "^0.2.0",
+    "aws-xray-sdk": "^3.3.3",
     "node-fetch": "^2.6.1",
     "winston": "^3.3.3"
   },
-  "devDependencies": {},
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
-    "linuxZip": "zip lambda.zip package.json *.js node_modules/*",
-    "windowsZip": "7z a -tzip lambda.zip package.json *.js node_modules/*",
+    "linuxZip": "zip -r lambda.zip .",
+    "windowsZip": "7z a -tzip lambda.zip package.json *.js node_modules/",
     "push": "aws lambda update-function-code --function-name up-notion-webhook --zip-file fileb:///home/isaac/code/lambda/lambda.zip"
   },
   "repository": {
