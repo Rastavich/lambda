@@ -45,11 +45,11 @@ exports.handler = async (event, context) => {
 
   // Transaction data
   const {
-    data: { attributes, id },
+    data: { attributes, relationships },
   } = upTransaction;
 
-  let accountType = id;
-  logger.info('Transaction Type', data);
+  let accountType = relationships.account.data.id;
+  logger.info('Transaction Type', accountType);
 
   // Filter out any transactions we dont want
   if (
@@ -62,9 +62,7 @@ exports.handler = async (event, context) => {
     logger.info('Transaction NOT added to notion', attributes);
     return {
       statusCode: 200,
-      body: {
-        message: 'Exclude Transfers, Held transactions, Round Up"s and Covers',
-      },
+      body: 'Exclude Transfers, Held transactions, Round Up"s and Covers',
     };
   }
 
@@ -81,28 +79,22 @@ exports.handler = async (event, context) => {
     },
     properties: {
       Date: {
-        id: 'MGZE',
         type: 'date',
         date: {
           start: attributes.createdAt.toString(),
         },
       },
       Type: {
-        id: '[c{o',
         type: 'select',
         select: {
-          id: 'e1661fc5-e5f8-444b-8667-a34c48e419f0',
           name: 'Expense',
-          color: 'yellow',
         },
       },
       Amount: {
-        id: 'a@LY',
         type: 'number',
         number: parseFloat(attributes.amount.value),
       },
       Name: {
-        id: 'title',
         type: 'title',
         title: [
           {
