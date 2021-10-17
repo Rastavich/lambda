@@ -24,14 +24,13 @@ const upRequestHeaders = {
 // Initialize notion client instance
 const notion = new Client({ auth: NOTION_API_KEY });
 
-exports.handler = async (event, context) => {
+exports.lambdaHandler = async (event, context) => {
   logger.defaultMeta = { requestId: context.awsRequestId };
   let input = JSON.parse(event.body);
   let accountType = input.data.relationships.account.data.id;
   // TODO add automatic amountType check and pass to the transaction
   let amountType = 'expense';
   logger.info('Transaction Created', input);
-
 
   let transactionURL = input.data.relationships.transaction.links.related;
   // Get the Up transactino information from the API using the webhook data.
@@ -70,7 +69,8 @@ exports.handler = async (event, context) => {
   }
 
   // Check if transaction is from 2UP account or not.
-  let databaseId = accountType === TWO_UP_ACCOUNT_ID ? NOTION_DB_ID_TWO_UP : NOTION_DB_ID;
+  let databaseId =
+    accountType === TWO_UP_ACCOUNT_ID ? NOTION_DB_ID_TWO_UP : NOTION_DB_ID;
   // Create the data object of the page for notion.
   const data = JSON.stringify({
     Date: {
@@ -121,7 +121,12 @@ exports.handler = async (event, context) => {
 
   logger.info('Data to push to notion', data);
 
-  createPage(databaseId);
+  await createPage(databaseId).then((resp) => {
+    return {
+      statusCode: 200,
+      body: resp,
+    };
+  });
   /**
    * Creates new page in Notion.
    *
@@ -133,19 +138,8 @@ exports.handler = async (event, context) => {
     await Promise.all(
       notion.pages.create({
         parent: { database_id: databaseId },
-        properties: data
+        properties: data,
       })
     );
-
-    logger.info(`Completed page creation: ${pagesToCreateBatch.length}`);
-    logger.info('Added to Notion', notionCreate);
-
   }
-
-  let response = {
-    statusCode: 200,
-    body: attributes,
-  };
-
-  return response;
 };
