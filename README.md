@@ -10,13 +10,16 @@ Up+Notion lambda which takes an up transaction webhook and adds the data into no
 
 # Setup the lambda function:
 
-- Complete the pre config steps
-- ```bash npm i```
+## Complete the pre config steps
+  ```bash 
+  npm i```
 
------------------------
-- Create the lambda in your AWS account with the following commands depending on your OS:
-    - Windows: ```bash npm run windowsZip ```
-    - Linux: ```bash npm run linuxZip ``` 
+----------------------
+## Create the lambda in your AWS account with the following commands depending on your OS:
+    Windows: ```bash 
+        npm run windowsZip ```
+    Linux: ```bash 
+        npm run linuxZip ``` 
 
 ## Create lambda function
 ```bash 
