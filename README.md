@@ -21,7 +21,7 @@ Up+Notion lambda which takes an up transaction webhook and adds the data into no
   ```npm run linuxZip```
 
 ## Create lambda function
-```bash 
+```zsh 
     aws lambda \
     --create-function \
     --function-name up-notion \
