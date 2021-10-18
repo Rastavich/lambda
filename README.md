@@ -25,17 +25,19 @@ Up+Notion lambda which takes an up transaction webhook and adds the data into no
     aws lambda \
     --create-function \
     --function-name up-notion \
-    --environment variables={'UP_KEY'='your_up_api_key','NOTION_DB_KEY'='your_notion_db_page'NOTION_API_KEY='your_notion_api_key' \
+    --environment variables={'UP_KEY'='your_up_api_key','NOTION_DB_KEY'='your_notion_db_page','NOTION_API_KEY'='your_notion_api_key' \
     --zip-file fileb:///home/$USER/path/to/cloned/repo/lambda.zip
 ```
 
 ## List the lambda you have created and copy the ARN
 
-``` aws lambda list-functions | grep arn```
+``` bash
+  aws lambda list-functions | grep arn
+```
 - Copy and paste the "FunctionArn" value from the list for the next step.
 
 ## Create the API gateway for the lambda using the ARN
-```
+```bash
   aws apigatewayv2 create-api \ 
     --name up-notion-api \
     --protocol-type http \ 
@@ -48,7 +50,7 @@ Up+Notion lambda which takes an up transaction webhook and adds the data into no
 - Get your up api key https://developer.up.com.au/#welcome
 - Create the UP API webhook
 - Substitute the "url" with the API gateway url for your lambda function and add your up api key
-  ```
+  ```bash
   curl https://api.up.com.au/api/v1/webhooks \ 
     -XPOST \ 
     -H 'Authorization: Bearer {{YOUR_UP_API_KEY}}' \ 
