@@ -19,7 +19,8 @@ Up+Notion lambda which takes an up transaction webhook and adds the data into no
     - Linux: ```bash npm run linuxZip ``` 
 
 ## Create lambda function
-```bash aws lambda \
+```bash 
+    aws lambda \
     --create-function \
     --function-name up-notion \
     --environment variables={'UP_KEY'='your_up_api_key','NOTION_DB_KEY'='your_notion_db_page'NOTION_API_KEY='your_notion_api_key' \
